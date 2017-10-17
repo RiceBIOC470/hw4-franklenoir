@@ -28,7 +28,9 @@ for j = 1:100
     stdmat(j) = std(meanint);
     meanmat(j) = mean(meanint);
 end
+figure;
 plot(1:100,stdmat(1:100));
+figure;
 plot(1:100,meanmat(1:100));
 
 %With the image created from 1, the image is 8 bit. The mean intensities,
@@ -73,33 +75,47 @@ reader2 = bfGetReader('nfkb_movie2.tif');
 reader1.getSizeT % 19
 reader2.getSizeT % 18
 
-zplane = 6;
+
 
 for i = 1:reader1.getSizeT
-    iplane = reader1.getIndex(zplane-1,1-1,i-1)+1;
-    tempimg1 = bfGetPlane(reader1,iplane);
-    iplane = reader1.getIndex(zplane-1,2-1,i-1)+1;
-    tempimg2 = bfGetPlane(reader1,iplane);
-    cattempimg = cat(3,imadjust(tempimg1),imadjust(tempimg2),zeros(size(tempimg1)));
+    iplane = reader1.getIndex(1-1,1-1,i-1)+1;
+    img_max1 = bfGetPlane(reader1,iplane);
+    iplane2 = reader1.getIndex(1-1,2-1,i-1)+1;
+    img_max2 = bfGetPlane(reader1,iplane2);
+
+    for k = 2:reader1.getSizeZ
+        iplane = reader1.getIndex(k-1,1-1,i-1)+1;
+        tempimg1 = bfGetPlane(reader1,iplane);
+        img_max1 = max(img_max1,tempimg1);
+        iplane2 = reader1.getIndex(k-1,2-1,i-1)+1;
+        tempimg2 = bfGetPlane(reader1,iplane2);
+        img_max2 = max(img_max2,tempimg1);
+    end
         
-    temp_d = im2double(cattempimg);
-    imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
-    
-    imwrite(imgbright,'hw4_2.tif','WriteMode','append')
+    cattempimg = cat(3,imadjust(img_max1),imadjust(img_max2),zeros(size(tempimg1)));
+        
+    imwrite(cattempimg,'hw4_2.tif','WriteMode','append')
 end
 
 
-for i = 1:reader2.getSizeT 
-    iplane = reader2.getIndex(zplane-1,1-1,i-1)+1;
-    tempimg1 = bfGetPlane(reader2,iplane);
-    iplane = reader2.getIndex(zplane-1,2-1,i-1)+1;
-    tempimg2 = bfGetPlane(reader2,iplane);
-    cattempimg = cat(3,imadjust(tempimg1),imadjust(tempimg2),zeros(size(tempimg1)));
-    
-    temp_d = im2double(cattempimg);
-    imgbright2 = uint16((2^16-1)*(temp_d./max(max(temp_d))));
-    imwrite(imgbright2,'hw4_2.tif','WriteMode','append');
-    
+for i = 1:reader2.getSizeT
+    iplane = reader2.getIndex(1-1,1-1,i-1)+1;
+    img_max1 = bfGetPlane(reader2,iplane);
+    iplane2 = reader2.getIndex(1-1,2-1,i-1)+1;
+    img_max2 = bfGetPlane(reader2,iplane2);
+
+    for k = 2:reader2.getSizeZ
+        iplane = reader2.getIndex(k-1,1-1,i-1)+1;
+        tempimg1 = bfGetPlane(reader2,iplane);
+        img_max1 = max(img_max1,tempimg1);
+        iplane2 = reader2.getIndex(k-1,2-1,i-1)+1;
+        tempimg2 = bfGetPlane(reader2,iplane2);
+        img_max2 = max(img_max2,tempimg1);
+    end
+        
+    cattempimg = cat(3,imadjust(img_max1),imadjust(img_max2),zeros(size(tempimg1)));
+        
+    imwrite(cattempimg,'hw4_2.tif','WriteMode','append')
 end
 
 
@@ -128,19 +144,25 @@ reader3 = bfGetReader('hw4_2.tif');
 % of movie 1. 
 
 reader1 = bfGetReader('nfkb_movie1.tif');
-iplane = reader1.getIndex(6-1,1-1,1-1)+1;
-tempimg1 = bfGetPlane(reader1,iplane);
 
-temp_d = im2double(tempimg1);
-imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
+iplane = reader1.getIndex(1-1,1-1,1-1)+1;
+img_max1 = bfGetPlane(reader1,iplane);
+
+for k = 2:reader1.getSizeZ
+        iplane = reader1.getIndex(k-1,1-1,1-1)+1;
+        tempimg1 = bfGetPlane(reader1,iplane);
+        img_max1 = max(img_max1,tempimg1);
+end
+
+resimg = img_max1;
 
 % 2. Write a function which performs smoothing and background subtraction
 % on an image and apply it to the image from (1). Any necessary parameters
 % (e.g. smoothing radius) should be inputs to the function. Choose them
 % appropriately when calling the function.
 
-imshow(imgbright);
-imgfil = removebackground(imgbright,4,2,100);
+imshow(resimg);
+imgfil = removebackground(resimg,4,2,100);
 imshow(imgfil);
 
 % 3. Write  a function which automatically determines a threshold  and
@@ -162,7 +184,7 @@ imshow(cleanmask);
 % cells, and c. the mean intensity of the cells in channel 1.
 
 [cellcount,meanarea,meanintensity] = cellcounts(imgfil,cleanmask);
-%57 cells, mean area 171, 4.61e+03 mean intensity
+%55 cells, mean area 168, 1.02e+03 mean intensity
 
 % 6. Apply your function from (2) to make a smoothed, background subtracted
 % image from channel 2 that corresponds to the image we have been using
@@ -170,19 +192,22 @@ imshow(cleanmask);
 % function from 5 to get the mean intensity of the cells in this channel.
 
 reader1 = bfGetReader('nfkb_movie1.tif');
-iplane = reader1.getIndex(6-1,2-1,1-1)+1;
-tempimg1 = bfGetPlane(reader1,iplane);
+iplane = reader1.getIndex(1-1,2-1,1-1)+1;
+img_max1 = bfGetPlane(reader1,iplane);
 
-temp_d = im2double(tempimg1);
-imgbright = uint16((2^16-1)*(temp_d/max(max(temp_d))));
-imgfil = removebackground(imgbright,4,2,100);
+for k = 2:reader1.getSizeZ
+        iplane = reader1.getIndex(k-1,2-1,1-1)+1;
+        tempimg1 = bfGetPlane(reader1,iplane);
+        img_max1 = max(img_max1,tempimg1);
+end
+imgfil = removebackground(img_max1,4,2,100);
 
 mask = automask(imgfil);
 
 cleanmask = cleanup(mask,4); 
 
 [cellcount,meanarea,meanintensity] = cellcounts(imgfil,cleanmask);
-%84 cells, mean area 635 pixels, 1.16e+03 mean intensity
+%75 cells, mean area 1345, 507 mean intensity
 
 %%
 % Problem 4. 
@@ -192,19 +217,21 @@ cleanmask = cleanup(mask,4);
 reader1 = bfGetReader('nfkb_movie1.tif');
 reader2 = bfGetReader('nfkb_movie2.tif');
 
-zplane = 6;
 
 v = VideoWriter('masks.avi');
 open(v);
 
 for i = 1:reader1.getSizeT
-    iplane = reader1.getIndex(zplane-1,1-1,i-1)+1;
-    tempimg1 = bfGetPlane(reader1,iplane);
+    iplane = reader1.getIndex(1-1,1-1,i-1)+1;
+    img_max1 = bfGetPlane(reader1,iplane);
     
-    temp_d = im2double(tempimg1);
-    imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
+    for k = 2:reader1.getSizeZ
+        iplane = reader1.getIndex(k-1,2-1,i-1)+1;
+        tempimg1 = bfGetPlane(reader1,iplane);
+        img_max1 = max(img_max1,tempimg1);
+    end
     
-    imgfil = removebackground(imgbright,4,2,100);
+    imgfil = removebackground(img_max1,4,2,100);
 
     mask = automask(imgfil);
 
@@ -216,14 +243,16 @@ end
 
 
 for i = 1:reader2.getSizeT 
-    iplane = reader2.getIndex(zplane-1,1-1,i-1)+1;
-    tempimg1 = bfGetPlane(reader2,iplane);
+    iplane = reader2.getIndex(1-1,1-1,i-1)+1;
+    img_max1 = bfGetPlane(reader2,iplane);
     
-    temp_d = im2double(tempimg1);
-    imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
-        
-    imgfil = removebackground(imgbright,4,2,100);
-
+    for k = 2:reader2.getSizeZ
+        iplane = reader2.getIndex(k-1,2-1,i-1)+1;
+        tempimg1 = bfGetPlane(reader2,iplane);
+        img_max1 = max(img_max1,tempimg1);
+    end
+            
+    imgfil = removebackground(img_max1,4,2,100);
 
     mask = automask(imgfil);
 
@@ -249,8 +278,7 @@ while hasFrame(v)
     channel1 = video(:,:,1); %Channels all read the same. 
     
     temp_d = im2double(channel1);
-    imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
-    imgfil = removebackground(imgbright,4,2,100);
+    imgfil = removebackground(temp_d,4,2,100);
     mask = automask(imgfil);
     cleanmask = cleanup(mask,4);  
     [cellcount1,meanarea1,meanintensity1] = cellcounts(imgfil,cleanmask);
@@ -267,16 +295,14 @@ plot(1:i-1,meanint1(1,:));
 xlabel('Time');
 ylabel('Mean Intensity');
 
-%Intensity varies low to high. Consistent pattern observed. Thresholds
-%around 6e4. 
-
+%Intensity varies low to high. Consistent pattern observed. Varies between
+%0.7 and 0.95
 figure;
 
 plot(1:i-1,cells1(1,:));
 xlabel('Time');
 ylabel('Number of Cells');
 
-%shift due to adding movie 1 & 2 together. Movie 1 has fewer observed cells
-%compared to movie 2. 
+%shift due to adding movie 1 & 2 together. 
 
 
