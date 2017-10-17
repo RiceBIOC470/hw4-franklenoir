@@ -140,7 +140,7 @@ imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
 % appropriately when calling the function.
 
 imshow(imgbright);
-imgfil = removebackground(imgbright,4,2,10);
+imgfil = removebackground(imgbright,4,2,100);
 imshow(imgfil);
 
 % 3. Write  a function which automatically determines a threshold  and
@@ -154,7 +154,7 @@ imshow(mask);
 % dots, or holes in nuclei. It should line up as closely as possible with
 % what you perceive to be the nuclei in your image. 
 
-cleanmask = cleanup(mask,3); %Disk radius
+cleanmask = cleanup(mask,4); %Disk radius
 imshow(cleanmask);
 
 % 5. Write a function that uses your image from (2) and your mask from 
@@ -162,7 +162,7 @@ imshow(cleanmask);
 % cells, and c. the mean intensity of the cells in channel 1.
 
 [cellcount,meanarea,meanintensity] = cellcounts(imgfil,cleanmask);
-%48 cells, mean area 1549 pixels, 1.09e+04 mean intensity
+%57 cells, mean area 171, 4.61e+03 mean intensity
 
 % 6. Apply your function from (2) to make a smoothed, background subtracted
 % image from channel 2 that corresponds to the image we have been using
@@ -175,14 +175,14 @@ tempimg1 = bfGetPlane(reader1,iplane);
 
 temp_d = im2double(tempimg1);
 imgbright = uint16((2^16-1)*(temp_d/max(max(temp_d))));
-imgfil = removebackground(imgbright,4,2,10);
+imgfil = removebackground(imgbright,4,2,100);
 
 mask = automask(imgfil);
 
-cleanmask = cleanup(mask,3); 
+cleanmask = cleanup(mask,4); 
 
 [cellcount,meanarea,meanintensity] = cellcounts(imgfil,cleanmask);
-%51 cells, mean area 869 pixels, 2.45e+03 mean intensity
+%84 cells, mean area 635 pixels, 1.16e+03 mean intensity
 
 %%
 % Problem 4. 
@@ -204,11 +204,11 @@ for i = 1:reader1.getSizeT
     temp_d = im2double(tempimg1);
     imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
     
-    imgfil = removebackground(imgbright,4,2,10);
+    imgfil = removebackground(imgbright,4,2,100);
 
     mask = automask(imgfil);
 
-    cleanmask = cleanup(mask,3); 
+    cleanmask = cleanup(mask,4); 
     
     tempim = im2double(cleanmask);
     writeVideo(v,tempim);
@@ -222,12 +222,12 @@ for i = 1:reader2.getSizeT
     temp_d = im2double(tempimg1);
     imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
         
-    imgfil = removebackground(imgbright,4,2,10);
+    imgfil = removebackground(imgbright,4,2,100);
 
 
     mask = automask(imgfil);
 
-    cleanmask = cleanup(mask,3); 
+    cleanmask = cleanup(mask,4); 
     
     tempim = im2double(cleanmask);
     writeVideo(v,tempim);
@@ -250,9 +250,9 @@ while hasFrame(v)
     
     temp_d = im2double(channel1);
     imgbright = uint16((2^16-1)*(temp_d./max(max(temp_d))));
-    imgfil = removebackground(imgbright,4,2,10);
+    imgfil = removebackground(imgbright,4,2,100);
     mask = automask(imgfil);
-    cleanmask = cleanup(mask,3);  
+    cleanmask = cleanup(mask,4);  
     [cellcount1,meanarea1,meanintensity1] = cellcounts(imgfil,cleanmask);
     
     cells1(1,i) = cellcount1;
@@ -267,7 +267,8 @@ plot(1:i-1,meanint1(1,:));
 xlabel('Time');
 ylabel('Mean Intensity');
 
-%Intensity varies low to high. Consistent pattern observed. 
+%Intensity varies low to high. Consistent pattern observed. Thresholds
+%around 6e4. 
 
 figure;
 
