@@ -226,7 +226,7 @@ for i = 1:reader1.getSizeT
     img_max1 = bfGetPlane(reader1,iplane);
     
     for k = 2:reader1.getSizeZ
-        iplane = reader1.getIndex(k-1,2-1,i-1)+1;
+        iplane = reader1.getIndex(k-1,1-1,i-1)+1;
         tempimg1 = bfGetPlane(reader1,iplane);
         img_max1 = max(img_max1,tempimg1);
     end
@@ -247,7 +247,7 @@ for i = 1:reader2.getSizeT
     img_max1 = bfGetPlane(reader2,iplane);
     
     for k = 2:reader2.getSizeZ
-        iplane = reader2.getIndex(k-1,2-1,i-1)+1;
+        iplane = reader2.getIndex(k-1,1-1,i-1)+1;
         tempimg1 = bfGetPlane(reader2,iplane);
         img_max1 = max(img_max1,tempimg1);
     end
