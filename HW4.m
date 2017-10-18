@@ -271,38 +271,81 @@ end
 % channels as a function of time. Make plots of these with time on the
 % x-axis and either number of cells or intensity on the y-axis. 
 
-v = VideoReader('masks.avi');
+reader1 = bfGetReader('nfkb_movie1.tif');
+reader2 = bfGetReader('nfkb_movie2.tif');
+
+
 i = 1;
-while hasFrame(v)
-    video = readFrame(v);
-    channel1 = video(:,:,1); %Channels all read the same. 
+for j = 1:reader1.getSizeT
+    iplane = reader1.getIndex(1-1,1-1,j-1)+1;
+    img = bfGetPlane(reader1,iplane);
+    iplane = reader1.getIndex(1-1,2-1,j-1)+1;
+    img2 = bfGetPlane(reader1,iplane);
     
-    temp_d = im2double(channel1);
+    temp_d = im2double(img);
+    imgfil = removebackground(temp_d,4,2,100);
+    mask = automask(imgfil);
+    cleanmask = cleanup(mask,4);  
+    [cellcount1,meanarea1,meanintensity1] = cellcounts(imgfil,cleanmask); 
+    
+    temp_d = im2double(img2);
+    imgfil = removebackground(temp_d,4,2,100);
+    mask = automask(imgfil);
+    cleanmask = cleanup(mask,4);  
+    [cellcount2,meanarea2,meanintensity2] = cellcounts(imgfil,cleanmask);
+    
+    cells1(1,i) = cellcount1;
+    cells1(2,i) = cellcount2;   
+    meanint1(1,i) = meanintensity1;
+    meanint1(2,i) = meanintensity2;
+    i = i+1;
+end
+
+for j = 1:reader2.getSizeT
+    iplane = reader2.getIndex(1-1,1-1,j-1)+1;
+    img = bfGetPlane(reader1,iplane);
+    iplane = reader2.getIndex(1-1,2-1,j-1)+1;
+    img2 = bfGetPlane(reader2,iplane);
+    
+    temp_d = im2double(img);
     imgfil = removebackground(temp_d,4,2,100);
     mask = automask(imgfil);
     cleanmask = cleanup(mask,4);  
     [cellcount1,meanarea1,meanintensity1] = cellcounts(imgfil,cleanmask);
     
-    cells1(1,i) = cellcount1;
+    temp_d = im2double(img2);
+    imgfil = removebackground(temp_d,4,2,100);
+    mask = automask(imgfil);
+    cleanmask = cleanup(mask,4);  
+    [cellcount2,meanarea2,meanintensity2] = cellcounts(imgfil,cleanmask);
     
+    cells1(1,i) = cellcount1;
+    cells1(2,i) = cellcount2;
     meanint1(1,i) = meanintensity1;
+    meanint1(2,i) = meanintensity2;
     i = i+1;
 end
 
 figure;
 
 plot(1:i-1,meanint1(1,:));
+hold on;
+plot(1:i-1,meanint1(2,:));
 xlabel('Time');
 ylabel('Mean Intensity');
 
-%Intensity varies low to high. Consistent pattern observed. Varies between
-%0.7 and 0.95
+%Channel 1 had more intense cells overall, but varied compared to channel 2 (more consistent
+%intensity obeserved in channel 2).
+
 figure;
 
 plot(1:i-1,cells1(1,:));
+hold on;
+plot(1:i-1,cells1(2,:));
+
 xlabel('Time');
 ylabel('Number of Cells');
 
-%shift due to adding movie 1 & 2 together. 
-
+%Channel 1 had fewer cells detected overall, but was more consistent compared to
+%channel 2.
 
