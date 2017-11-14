@@ -2,6 +2,27 @@
 %% 
 %Walter Frank Lenoir
 % Problem 1. 
+%GB comments:
+1a 100
+1b 100
+1c 100
+1d 100 please provide axis information for your plots. Otherwise the plots are meaningless as I do not know which one correlates with mean or std. additionally if you plot multiple graphs like this: 
+figure;
+plot(1:100,stdmat(1:100));
+figure;
+plot(1:100,meanmat(1:100));
+
+The second plot overwrites the first and all I see is one plot. To distinguish one from the other you can use 1) subplot function; or 2) write figure(1); plot data figure(2); plot data. In each case two figures will be printed and it will be clear to other users which plot data correlates with the graphs. 
+2a 100 I’ll give credit but the nuclear images are really kinda off. Lets talk and see what you did as your answer doesn’t give me the details I need to figure out your issues. 
+2b. 75 Close, but the final product is missing both channels in the avi file.  
+3a. 100
+3b 100
+3c 100
+3d 100
+3e 100
+4a. 100
+4b. 100
+ Overall = 98
 
 % 1. Write a function to generate an 8-bit image of size 1024x1024 with a random value 
 % of the intensity in each pixel. Call your image rand8bit.tif. 
